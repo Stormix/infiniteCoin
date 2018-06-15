@@ -1,0 +1,22 @@
+{
+    "name": "stormiix/infiniteCoin",
+    "description": "Personal take on CryptoCurrency & Blockchain - EXPERIMENTAL!",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Anas Mazouni",
+            "email": "madadj4@gmail.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "autoload": {
+        "psr-4": {
+            "infiniteCoin\\": "src"
+        }
+    },
+    "require": {
+        "php": ">=7.0",
+        "klein/klein": "dev-master",
+        "monolog/monolog": "^2.0@dev"
+    }
+}
