@@ -98,7 +98,7 @@ $router->respond('POST', '/txion', function () {
 $router->respond('GET', '/blocks', function () {
 	global $BlockChain,$transactions,$transactionLog,$miner_address;
 	$chainToSend = [];
-	# Convert our blocks into dictionaries
+	# Convert our blocks into associative arrays
 	# so we can send them as json objects later
 	foreach($BlockChain->chain as $block){
 		$jsonBlock = array(
