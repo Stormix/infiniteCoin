@@ -1,4 +1,6 @@
-# infiniteCoin
+
+<p align="center"><a href="#"><img src="https://i.imgur.com/2kF5XJz.png" alt="A logo because why the heck not ?"></a></p>
+
 
 Personal take on Crypto Currency 💰 &amp; Blockchain ⛓ - EXPERIMENTAL!
 
