@@ -14,13 +14,9 @@ include "BlockChain.php";
 
 use infiniteCoin\Block;
 use infiniteCoin\BlockChain;
+use infiniteCoin\Transaction;
 
 $BlockChain = new BlockChain();
-$genesisBlock = new Block(0,time(),json_encode(array(
-	"proofOfWork" => 9,
-	"transactions" => array()
-)),"0");
-$BlockChain->addBlock($genesisBlock);
 $peer_nodes = [];
 function findNewChains(){
   # Get the blockchains of every

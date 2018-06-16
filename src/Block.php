@@ -18,17 +18,24 @@ namespace infiniteCoin;
  */
 class Block
 {
-    public function __construct($index,$timestamp,$data,$previous_hash)
+    public function __construct($index,$timestamp,$transactions,$previous_hash = NULL)
     {
         $this->index = $index;
         $this->timestamp = $timestamp;
-        $this->data = $data;
+        $this->transactions = $transactions;
         $this->previous_hash = $previous_hash;
+        $this->nonce = 0; //https://www.savjee.be/2017/09/Implementing-proof-of-work-javascript-blockchain/
         $this->hash = $this->hash_block();
     }
     public function hash_block(){
-        $data = $this->index.$this->timestamp.json_encode($this->data).$this->previous_hash;
+        $data = $this->index.$this->previous_hash.$this->timestamp.json_encode($this->transactions).$this->nonce;
         return hash('sha256',$data);
+    }
+    public function mineBlock($difficulty) {
+        while (substr($this->hash, 0, $difficulty) !== str_repeat("0", $difficulty)) {
+            $this->nonce++;
+            $this->hash = $this->hash_block();
+        }
     }
 
 }
