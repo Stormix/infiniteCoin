@@ -60,16 +60,6 @@ class BlockChain
         return $block;
     }
 
-    public function nextBlock($lastBlock = NULL){
-        $chainLength = count($this->chain);
-        if($chainLength > 0){
-            $lastBlock = $this->getLastBlock;
-        }else if ($lastBlock == NULL){
-            print("A last block should be provided since the chain is empty! \n");
-        }
-        return new Block($lastBlock->index+1,$lastBlock->timestamp,$lastBlock->transactions,$lastBlock->hash);
-    }
-
     public function getBalanceOfAddress($address,$pending = False){
         $balance = 0; // you start at zero!
         // Loop over each block and each transaction inside the block
@@ -119,7 +109,7 @@ class BlockChain
         for ($i = 1; $i < count($this->chain); $i++) {
             $currentBlock = $this->chain[$i];
             $previousBlock = $this->chain[$i-1];
-            if ($currentBlock->hash != $currentBlock->calculateHash()) {
+            if ($currentBlock->hash != $currentBlock->hash_block()) {
                 return false;
             }
             if ($currentBlock->previousHash != $previousBlock->hash) {

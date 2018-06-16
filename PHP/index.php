@@ -6,7 +6,7 @@
  * @version 0.1
  *
  * @copyright Copyright (c) 2018, Stormix.co
- */
+ */ 
 
 require_once __DIR__ . '/vendor/autoload.php';
 include_once("src/infiniteCoin.php");
