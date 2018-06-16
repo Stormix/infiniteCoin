@@ -15,13 +15,14 @@ import json
 
 
 class Block():
-    def __init__(self, index, timestamp, transactions, previous_hash=None):
+    def __init__(self, index, timestamp, transactions, previous_hash=None, nonce=0, hash=None):
         self.index = index
         self.timestamp = timestamp
         self.transactions = transactions
         self.previous_hash = previous_hash
-        self.nonce = 0  # https: // www.savjee.be/2017/09/Implementing-proof-of-work-javascript-blockchain
-        self.hash = self.hash_block()
+        # https: // www.savjee.be/2017/09/Implementing-proof-of-work-javascript-blockchain
+        self.nonce = nonce
+        self.hash = self.hash_block() if not hash else hash
 
     def transactionsJson(self):
         return [{"fromAddress": trans.fromAddress, "toAddress": trans.toAddress, "amount": trans.amount} for trans in self.transactions]
