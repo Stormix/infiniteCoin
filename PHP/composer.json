@@ -18,5 +18,6 @@
         "php": ">=7.0",
         "klein/klein": "dev-master",
         "monolog/monolog": "^2.0@dev"
+
     }
 }
