@@ -13,6 +13,7 @@ import json
 import requests
 from flask import Flask, jsonify, request
 import infiniteCoin
+import sys
 
 BlockChain = infiniteCoin.BlockChain()
 miner_address = "address"
@@ -73,7 +74,7 @@ def register():
     nodes = data['nodes'][0].split(",")
     for node in nodes:
         if not node in BlockChain.nodes:
-            BlockChain.registerNode(node)
+            BlockChain.registerNode("http://"+node)
     response = {
         'message': 'New nodes have been added',
         'total_nodes': list(BlockChain.nodes),
@@ -87,16 +88,17 @@ def consensus():
     if replaced:
         response = {
             'message': 'Our chain was replaced',
-            'new_chain': BlockChain.chain
+            'new_chain': BlockChain.chainDict()
         }
     else:
         response = {
             'message': 'Our chain is authoritative',
-            'chain': BlockChain.chain
+            'chain': BlockChain.chainDict()
         }
 
     return jsonify(response), 200
 
 
 if __name__ == '__main__':
-    node.run(debug=True)
+    port = int(sys.argv[1])
+    node.run(port=port, debug=True)

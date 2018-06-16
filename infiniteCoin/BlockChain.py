@@ -74,18 +74,18 @@ class BlockChain():
     def getLastBlock(self):
         return self.chain[-1] if len(self.chain) > 0 else None
 
-    def valid_chain(self):
+    def valid_chain(self, chain):
         """
         Determine if a given blockchain is valid
         :param chain: A blockchain
         :return: True if valid, False if not
         """
 
-        last_block = self.chain[0]
-        for block in self.chain[1:]:
+        last_block = chain[0]
+        for block in chain[1:]:
             # Check that the hash of the block is correct
-            last_block_hash = last_block.hash
-            if block.previous_hash != last_block_hash:
+            last_block_hash = last_block['hash']
+            if block['previous_hash'] != last_block_hash:
                 return False
             last_block = block
         return True
@@ -117,6 +117,15 @@ class BlockChain():
 
         # Replace our chain if we discovered a new, valid chain longer than ours
         if new_chain:
-            self.chain = new_chain
+            self.chain = self.toObject(new_chain)
             return True
         return False
+
+    def toObject(self, chain):
+        output = []
+        for block in chain:
+            blockTransactions = [Transaction(
+                trans["fromAddress"], trans["toAddress"], trans["amount"]) for trans in block["transactions"]]
+            output += [Block(block['index'], block['timestamp'],
+                             blockTransactions, block['previous_hash'], block['nonce'])]
+        return output
