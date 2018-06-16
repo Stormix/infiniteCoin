@@ -8,6 +8,7 @@
 * @copyright Copyright (c) 2018, Stormix.co
 */
 """
+from collections import OrderedDict
 
 
 class Transaction():
@@ -15,3 +16,6 @@ class Transaction():
         self.fromAddress = fromAddress
         self.toAddress = toAddress
         self.amount = amount
+
+    def transactionDict(self):
+        return OrderedDict({"fromAddress": self.fromAddress, "toAddress": self.toAddress, "amount": self.amount})

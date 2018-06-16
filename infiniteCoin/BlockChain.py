@@ -10,18 +10,32 @@
 """
 from .Block import Block
 from .Transaction import Transaction
+import binascii
+from collections import OrderedDict
+
 import time
 import requests
+import Crypto
+import Crypto.Random
+from Crypto.Hash import SHA
+from Crypto.PublicKey import RSA
+from Crypto.Signature import PKCS1_v1_5
+from uuid import uuid4
+import json
+from flask_cors import CORS
 
 
 class BlockChain():
-    def __init__(self):
+    def __init__(self, MINING_SENDER="Network", MINING_REWARD=1, MINING_DIFFICULTY=2):
         genesisBlock = Block(0, time.time(), [], "0")
         self.chain = [genesisBlock]
-        self.difficulty = 2
+        self.difficulty = MINING_DIFFICULTY
         self.pendingTransactions = []
-        self.miningReward = 1
+        self.miningReward = MINING_REWARD
+        self.miningSender = MINING_SENDER
         self.nodes = []
+        # Generate random number to be used as node_id
+        self.node_id = str(uuid4()).replace('-', '')
 
     def chainDict(self):
         result = []
@@ -38,20 +52,57 @@ class BlockChain():
         return result
 
     def registerNode(self, address):
-        self.nodes += [address]
+        """
+        Add a new node to the list of nodes
+        """
+        # Checking node_url has valid format
+        parsed_url = urlparse(address)
+        if parsed_url.netloc:
+            self.nodes += [parsed_url.netloc]
+        elif parsed_url.path:
+            # Accepts an URL without scheme like '192.168.0.5:5000'.
+            self.nodes += [parsed_url.path]
+        else:
+            raise ValueError('Invalid URL')
 
-    def createTransaction(self, transaction):
-        self.pendingTransactions += [transaction]
-        return self.getLastBlock().index + 1
+    def verifyTransactionSignature(self, sender_address, signature, transaction):
+        """
+        Check that the provided signature corresponds to transaction
+        signed by the public key (sender_address)
+        """
+        try:
+            public_key = RSA.importKey(binascii.unhexlify(sender_address))
+            verifier = PKCS1_v1_5.new(public_key)
+            h = SHA.new(str(transaction.transactionDict()).encode('utf8'))
+            return verifier.verify(h, binascii.unhexlify(signature))
+        except ValueError:
+            return False
+    def createTransaction(self, sender_address, recipient_address, value, signature):
+        transaction = Transaction(sender_address, recipient_address, value)
+        # Reward for mining a block
+        if sender_address == self.miningSender:
+            self.pendingTransactions.append(transaction)
+            return self.getLastBlock().index + 1
+        # Manages transactions from wallet to another wallet
+        else:
+            transaction_verification = self.verifyTransactionSignature(
+                sender_address, signature, transaction)
+            if transaction_verification:
+                self.pendingTransactions.append(transaction)
+                return self.getLastBlock().index + 1
+            else:
+                return False
 
-    def minePendingTransactions(self, miningRewardAddress):
+    def minePendingTransactions(self):
         block = Block(self.getLastBlock().index + 1, time.time(),
                       self.pendingTransactions, self.getLastBlock().hash)
         block.mineBlock(self.difficulty)
         self.chain += [block]
-        self.pendingTransactions = [
-            Transaction("network", miningRewardAddress, self.miningReward)
-        ]
+        # only send reward after the user has mined the coin , doing it before could have him
+        # cancel the mining and still earn coins!
+        self.pendingTransactions = []
+        self.createTransaction(
+            self.miningSender, self.node_id, self.miningReward, "")
         return block
 
     def getBalanceOfAddress(self, address, pending=False):

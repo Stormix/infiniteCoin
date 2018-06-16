@@ -13,10 +13,12 @@ import json
 import requests
 from flask import Flask, jsonify, request
 import infiniteCoin
-import sys
 
-BlockChain = infiniteCoin.BlockChain()
-miner_address = "address"
+MINING_SENDER = "THE BLOCKCHAIN"
+MINING_REWARD = 1
+MINING_DIFFICULTY = 2
+BlockChain = infiniteCoin.BlockChain(
+    MINING_SENDER, MINING_REWARD, MINING_DIFFICULTY)
 
 node = Flask(__name__)
 
@@ -30,30 +32,41 @@ def hello():
 def mine():
     # We run the proof of work algorithm to get the next proof...
     print('Starting the miner...')
-    block = BlockChain.minePendingTransactions(miner_address)
-    print('A coin will be added to current balance of ' +
-          miner_address + ':'+str(BlockChain.getBalanceOfAddress(miner_address)))
+    block = BlockChain.minePendingTransactions()
     return jsonify({
         'message': "New Block Forged",
         'index': block.index,
         'transactions': block.transactionsJson(),
         'proof': block.nonce,
         'previous_hash': block.previous_hash
-    })
+    }), 200
 
 
 @node.route('/transactions/new', methods=['POST'])
 def new():
     data = dict(request.form)
-    required = ['from', 'to', 'amount']
+    required = ['from', 'to', 'amount', 'signature']
     if not all(k in data.keys() for k in required):
         return 'Missing values', 400
     # Create a new Transaction
-    index = BlockChain.createTransaction(infiniteCoin.Transaction(
-        data['from'][0], data['to'][0], data['amount'][0]))
+    index = BlockChain.createTransaction(
+        data['from'][0], data['to'][0], data['amount'][0], data['signature'][0])
 
-    response = {'message': f'Transaction will be added to Block {index}'}
-    return jsonify(response), 201
+    if index == False:
+        response = {'message': 'Invalid Transaction!'}
+        return jsonify(response), 406
+    else:
+        response = {
+            'message': 'Transaction will be added to Block ' + str(index)}
+        return jsonify(response), 201
+
+
+@node.route('/transactions/get', methods=['GET'])
+def get_transactions():
+    # Get transactions from transactions pool
+    transactions = BlockChain.pendingTransactions
+    response = {'transactions': transactions}
+    return jsonify(response), 200
 
 
 @node.route('/blocks')
@@ -71,7 +84,9 @@ def register():
     required = ['nodes']
     if not all(k in data.keys() for k in required):
         return 'Missing values', 400
-    nodes = data['nodes'][0].split(",")
+    nodes = data['nodes'][0].replace(" ", "").split(",")
+    if nodes is None:
+        return "Error: Please supply a valid list of nodes", 400
     for node in nodes:
         if not node in BlockChain.nodes:
             BlockChain.registerNode("http://"+node)
@@ -99,6 +114,19 @@ def consensus():
     return jsonify(response), 200
 
 
+@node.route('/nodes/get', methods=['GET'])
+def get_nodes():
+    nodes = list(BlockChain.nodes)
+    response = {'nodes': nodes}
+    return jsonify(response), 200
+
+
 if __name__ == '__main__':
-    port = int(sys.argv[1])
+    from argparse import ArgumentParser
+
+    parser = ArgumentParser()
+    parser.add_argument('-p', '--port', default=5000,
+                        type=int, help='port to listen on')
+    args = parser.parse_args()
+    port = args.port
     node.run(port=port, debug=True)
