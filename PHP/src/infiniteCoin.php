@@ -15,10 +15,12 @@ include "BlockChain.php";
 use infiniteCoin\Block;
 use infiniteCoin\BlockChain;
 use infiniteCoin\Transaction;
-use infiniteCoin\Session;
+use mikehaertl\tmp\File;
 
 $BlockChain = new BlockChain();
-$infiniteCoin = Session::getInstance("port".$_SERVER['SERVER_PORT']);
+$infiniteCoin = Session::getInstance();
+$file = new File("port".$_SERVER['SERVER_PORT'], '.tmp');
+
 if(!isset($infiniteCoin->BlockChain)){
 	$infiniteCoin->BlockChain = $BlockChain;
 }

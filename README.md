@@ -10,6 +10,7 @@ and [Aunyks's tiny blockchain implementation in Python](https://medium.com/crypt
 #### Why PHP ?
 Because why the f*** not ? PHP IS ❤️
 
+
 ---
 
 ### Implementation TO BE EXPLAINED ! IGNORE THIS !
